@@ -23,6 +23,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/extract.hpp>
 #include "boost/python/numpy.hpp"
+#include <boost/type_index.hpp>
 
 namespace bp = boost::python;
 namespace bn = boost::python::numpy;
@@ -275,6 +276,18 @@ bp::dict getDefaultConfig()
 	return pto.getValueDict();
 }
 
+template<typename T>
+struct vector_to_list
+{
+    static PyObject* convert(const std::vector<T>& vec)
+    {
+        boost::python::list pyList;
+        for (const auto& elem : vec)
+            pyList.append(elem);
+        return boost::python::incref(pyList.ptr());
+    }
+};
+
 
 using namespace boost::python;
 
@@ -282,8 +295,9 @@ BOOST_PYTHON_MODULE(octdata4python)
 {
 	bn::initialize();
 
-	def("readFile", readFileDefault);
-	def("readFile", readFileOpt);
+    boost::python::to_python_converter<std::vector<int>, vector_to_list<int>>();
+
+	def("readFileDefault", readFileDefault);
+	def("readFileOpt", readFileOpt);
 	def("getDefaultConfig", getDefaultConfig);
 };
-

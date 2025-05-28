@@ -2,17 +2,18 @@
 name = "octdata4python"
 version = "0.1.0"
 dependencies = [
-    "auditwheel>=6.4.0",
-    "build>=1.2.2.post1",
+    "build",
     "numpy<=1.26.0"
 ]
+
+[project.optional-dependencies]
+linux = ["auditwheel"]
+windows = ["delvewheel"]
 
 [tool.scikit-build]
 sdist.exclude = [".venv/*"]
 wheel.packages = ["octdata4python"]
 
 [build-system]
-requires = [
-    "scikit-build-core>=0.11.3"
-]
+requires = ["scikit-build-core>=0.11.3"]
 build-backend = "scikit_build_core.build"

@@ -2,13 +2,15 @@
 name = "octdata4python"
 version = "0.1.0"
 dependencies = [
-    "build",
     "numpy<=1.26.0"
 ]
 
-[project.optional-dependencies]
-linux = ["auditwheel"]
-windows = ["delvewheel"]
+[dependency-groups]
+dev = [
+  "build",
+  "auditwheel; sys_platform == 'linux'",
+  "delvewheel; sys_platform == 'win32'"
+]
 
 [tool.scikit-build]
 sdist.exclude = [".venv/*"]

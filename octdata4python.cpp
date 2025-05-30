@@ -187,15 +187,22 @@ namespace
 
 		ParameterToOptions pto;
 		bscan->getSetParameter(pto);
-		dict["data"] = pto.getValueDict();
-
+		bp::dict dataDict = pto.getValueDict();
+		
+		bp::dict segDict = convertSegmentation(bscan->getSegmentLines());
+		bp::list segKeys = segDict.keys();
+		for (int i = 0; i < bp::len(segKeys); ++i)
+		{
+			std::string key = bp::extract<std::string>(segKeys[i]);
+			dataDict[key] = segDict[key];
+		}
+		dict["data"] = dataDict;
 
 		if(!bscan->getImage().empty())
 			dict["image"] = wrapOpenCvMat<uint8_t>(bscan->getImage());
 		if(!bscan->getAngioImage().empty())
 			dict["imageAngio"] = wrapOpenCvMat<uint8_t>(bscan->getAngioImage());
 
-		dict["data"] = convertSegmentation(bscan->getSegmentLines());
 		return dict;
 	}
 

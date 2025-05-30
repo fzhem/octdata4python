@@ -39,4 +39,4 @@ target_link_libraries(octdata4python
     Python3::Module
 )
 
-install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY DESTINATION octdata4python)
+install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY DESTINATION octdata4python/core)

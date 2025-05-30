@@ -3,7 +3,7 @@ project(octdata4python LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(Boost COMPONENTS python numpy REQUIRED)
 find_package(LibOctData REQUIRED)
 find_package(OpenCV REQUIRED COMPONENTS core)

@@ -1,0 +1,8 @@
+services:
+  octdata4python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: octdata4python
+    command: >
+      sh -c "tail -f /dev/null"

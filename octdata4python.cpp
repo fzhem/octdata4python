@@ -36,6 +36,18 @@ namespace bn = boost::python::numpy;
 
 #include <octdata/datastruct/sloimage.h>
 #include <octdata/datastruct/bscan.h>
+#include <boost/log/trivial.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/console.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+
+void init_logging()
+{
+    boost::log::add_console_log(std::clog, boost::log::keywords::format = "[%TimeStamp%] [%Severity%]: %Message%");
+    boost::log::add_common_attributes();
+}
+
 
 
 namespace
@@ -73,48 +85,51 @@ namespace
 	{
 		ParameterToOptions* parent = nullptr;
 		std::string nameInParent;
-
+	
 		bp::dict valueDict;
 	public:
 		~ParameterToOptions()
 		{
 			if(parent)
+			{
+				BOOST_LOG_TRIVIAL(debug) << "Setting subset [" << nameInParent << "] into parent valueDict.";
 				parent->valueDict[nameInParent] = getValueDict();
+			}
 		}
-
+	
 		template<typename T>
 		void operator()(const std::string& name, T& value)
 		{
+			BOOST_LOG_TRIVIAL(debug) << "Adding key [" << name << "] with value type [" << typeid(T).name() << "]";
 			valueDict[name] = value;
 		}
-
-
+	
 		template<typename T>
 		void operator()(const std::string& name, const std::vector<T>& value)
 		{
+			BOOST_LOG_TRIVIAL(debug) << "Adding vector key [" << name << "] with size [" << value.size() << "]";
 			bp::list list;
 			for(const T& val : value)
 				list.append(val);
 			valueDict[name] = list;
 		}
-
-
+	
 		ParameterToOptions subSet(const std::string& name)
 		{
+			BOOST_LOG_TRIVIAL(debug) << "Creating subset for key [" << name << "]";
 			ParameterToOptions pto;
-
 			pto.parent = this;
 			pto.nameInParent = name;
-
 			return pto;
 		}
-
+	
 		bp::dict getValueDict()
 		{
+			BOOST_LOG_TRIVIAL(debug) << "Returning valueDict with keys: " << bp::extract<std::string>(bp::str(valueDict.keys()));
 			return std::move(valueDict);
 		}
-
 	};
+
 
 	template<typename T>
 	inline T getConfigFromStruct(const bp::dict& dict, const char* name, const T defaultValue)
@@ -210,21 +225,24 @@ namespace
 	bp::dict convertStructure(const S& structure)
 	{
 		static const std::string structureName = getSubStructureName<S>();
-
+		BOOST_LOG_TRIVIAL(info) << "Converting structure of type [" << structureName << "]";
+	
 		bp::dict dict;
-
+	
 		ParameterToOptions pto;
 		structure.getSetParameter(pto);
-
+	
 		dict["data"] = pto.getValueDict();
-
+	
 		for(typename S::SubstructurePair const& subStructPair : structure)
 		{
 			std::string subStructName = structureName + '_' + boost::lexical_cast<std::string>(subStructPair.first);
+			BOOST_LOG_TRIVIAL(debug) << "Recursively converting substructure [" << subStructName << "]";
 			dict[subStructName] = convertStructure(*subStructPair.second);
 		}
 		return dict;
 	}
+
 
 	template<>
 	bp::dict convertStructure<OctData::Series>(const OctData::Series& series)

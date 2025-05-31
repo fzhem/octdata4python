@@ -207,40 +207,22 @@ namespace
 	template<typename S>
 	bp::dict convertStructure(const S& structure)
 	{
-	    static const std::string structureName = getSubStructureName<S>();
-	
-	    bp::dict dict;
-	
-	    ParameterToOptions pto;
-	    structure.getSetParameter(pto);
-	
-	    // 🎙️ STANDARD LIB LOGGING
-	    std::cout << "==== Converting Structure: " << structureName << " ====" << std::endl;
-	
-	    // Dump parameter values (if pto.getValueDict() gives us a bp::dict)
-	    bp::dict valueDict = pto.getValueDict();
-	    std::cout << "Parameter Values:" << std::endl;
-	    int len = bp::len(valueDict);
-	    for (int i = 0; i < len; ++i) {
-	        bp::object key = valueDict.keys()[i];
-	        bp::object value = valueDict[key];
-	        std::cout << "  " 
-	                  << bp::extract<std::string>(bp::str(key)) << " = " 
-	                  << bp::extract<std::string>(bp::str(value)) << std::endl;
-	    }
-	
-	    dict["data"] = valueDict;
-	
-	    // Count substructures before iterating
-	    std::cout << "Substructures count: " << std::distance(structure.begin(), structure.end()) << std::endl;
-	
-	    for (typename S::SubstructurePair const& subStructPair : structure)
-	    {
-	        std::string subStructName = structureName + '_' + boost::lexical_cast<std::string>(subStructPair.first);
-	        dict[subStructName] = convertStructure(*subStructPair.second);
-	    }
-	
-	    return dict;
+		static const std::string structureName = getSubStructureName<S>();
+
+		bp::dict dict;
+
+		ParameterToOptions pto;
+		structure.getSetParameter(pto);
+		std::cout << "==== Converting Structure: " << structureName << " ====" << std::endl;
+		dict["data"] = pto.getValueDict();
+		std::cout << "Parameter Values:" << std::endl;
+
+		for(typename S::SubstructurePair const& subStructPair : structure)
+		{
+			std::string subStructName = structureName + '_' + boost::lexical_cast<std::string>(subStructPair.first);
+			dict[subStructName] = convertStructure(*subStructPair.second);
+		}
+		return dict;
 	}
 
 

@@ -3,8 +3,22 @@ project(octdata4python LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# 🔧 Match Boost build config
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+
+# Match Boost libs per platform and Python version
+if(WIN32)
+  string(REPLACE "." "" PY_VER "${Python3_VERSION}")
+  set(BOOST_PYTHON_COMPONENT "python${PY_VER}")
+else()
+  set(BOOST_PYTHON_COMPONENT "python")
+endif()
+message(STATUS "🐍 Boost.Python component resolved as: ${BOOST_PYTHON_COMPONENT}")
+
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
-find_package(Boost COMPONENTS python numpy REQUIRED)
+find_package(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} numpy REQUIRED)
 find_package(LibOctData REQUIRED)
 find_package(OpenCV REQUIRED COMPONENTS core)
 

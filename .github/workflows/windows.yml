@@ -1,0 +1,228 @@
+name: Windows Wheels
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    runs-on: windows-2025
+
+    env:
+      Boost_DIR: C:/Boost/lib/cmake/Boost-1.88.0
+      DCMTK_DIR: C:/tools/dcmtk-20241211-ac00290
+      OpenCV_DIR: C:/tools/opencv/build
+      OpenJPEG_DIR: C:/Program Files (x86)/OPENJPEG
+      Python310_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.10.11\x64
+      Python311_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.11.9\x64
+      Python312_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+      Python313_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.3\x64
+
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies (numpy needed for boost)
+        run: |
+          $versions = @("Python310", "Python311", "Python312")
+          foreach ($v in $versions) {
+            $root = (Get-Item "env:${v}_ROOT_DIR").Value
+            & "$root\python.exe" -m pip install --upgrade pip setuptools wheel
+            & "$root\Scripts\pip.exe" install numpy==1.26.0
+          }
+
+      - name: Clone required forks
+        run: |
+          mkdir C:/repos; if ($?) { cd C:/repos }
+          git clone https://github.com/kaygdev/oct_cpp_framework.git
+          git clone https://github.com/kaygdev/LibE2E.git
+          git clone https://github.com/fzhem/LibOctData.git
+          git clone https://github.com/fzhem/octdata4python.git
+
+      - name: Add missing boost find_package
+        run: |
+          (Get-Content C:/repos/oct_cpp_framework/CMakeLists.txt) -replace 'find_package\(OpenCV REQUIRED\)', "find_package(OpenCV REQUIRED)`r`nfind_package(Boost REQUIRED)" | Set-Content C:/repos/oct_cpp_framework/CMakeLists.txt
+          (Get-Content C:/repos/LibE2E/CMakeLists.txt) -replace 'find_package\(OpenCV REQUIRED\)', "find_package(OpenCV REQUIRED)`r`nfind_package(Boost REQUIRED)" | Set-Content C:/repos/LibE2E/CMakeLists.txt
+
+      - name: Restore OpenCV cache
+        id: restore-opencv-cache
+        uses: actions/cache/restore@v4
+        with:
+          key: opencv-4.11.0-windows-${{ runner.os }}
+          path: C:/tools/opencv
+
+      - name: Install OpenCV via Chocolatey
+        if: steps.restore-opencv-cache.outputs.cache-hit != 'true'
+        run: choco install opencv --version=4.11.0 -y --no-progress
+
+      - name: Save OpenCV cache
+        uses: actions/cache/save@v4
+        if: steps.restore-opencv-cache.outputs.cache-hit != 'true'
+        with:
+          key: opencv-4.11.0-windows-${{ runner.os }}
+          path: C:/tools/opencv
+
+      - name: Download Zlib from source
+        run: |
+          curl -L -o C:/tools/zlib.zip https://zlib.net/zlib131.zip
+          tar -xf C:/tools/zlib.zip -C C:/tools
+
+      - name: Build Zlib
+        shell: cmd
+        run: |
+          cd /d C:/tools/zlib-1.3.1
+          mkdir build && cd build
+          cmake .. -G "Visual Studio 17 2022"
+          cmake --build . --config Release --target install
+
+      - name: Restore Boost zip cache
+        id: restore-boost-zip-cache
+        uses: actions/cache/restore@v4
+        with:
+          key: boost-1.88.0-zip-${{ runner.os }}
+          path: C:/tools/boost.zip
+
+      - name: Download Boost from source
+        if: steps.restore-boost-zip-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -L -o C:/tools/boost.zip https://archives.boost.io/release/1.88.0/source/boost_1_88_0.zip
+          mkdir C:/local
+          tar -xf C:/tools/boost.zip -C C:/local
+
+      - name: Save Boost zip cache
+        uses: actions/cache/save@v4
+        if: steps.restore-boost-zip-cache.outputs.cache-hit != 'true'
+        with:
+          key: boost-1.88.0-zip-${{ runner.os }}
+          path: C:/tools/boost.zip
+
+      - name: Restore Boost build cache
+        id: restore-boost-build-cache
+        uses: actions/cache/restore@v4
+        with:
+          key: boost-1.88.0-build-${{ runner.os }}
+          path: C:/Boost
+
+      - name: Run Boost Bootstrap Script
+        if: steps.restore-boost-build-cache.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          cd /d C:/local/boost_1_88_0
+          bootstrap.bat
+
+      - name: Build and Install Boost Libraries
+        env:
+           BOOST_BUILD_PATH: ${{ github.workspace }}
+        if: steps.restore-boost-build-cache.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          cd /d C:/local/boost_1_88_0
+          b2 -j%NUMBER_OF_PROCESSORS% ^
+              toolset=msvc-14.3 address-model=64 variant=release link=shared threading=multi runtime-link=shared ^
+              python=3.10,3.11,3.12 ^
+            --with-iostreams --with-locale --with-log --with-python --with-program_options --with-serialization ^
+            --debug-configuration ^
+            --prefix=C:/Boost install
+
+      - name: Save Boost build cache
+        uses: actions/cache/save@v4
+        if: steps.restore-boost-build-cache.outputs.cache-hit != 'true'
+        with:
+          key: boost-1.88.0-build-${{ runner.os }}
+          path: C:/Boost
+
+      - name: Clone OpenJPEG
+        run: |
+          cd C:/repos
+          git clone --branch v2.5.3 https://github.com/uclouvain/openjpeg.git
+
+      - name: Build OpenJPEG
+        run: |
+          cd C:/repos/openjpeg
+          cmake -G "Visual Studio 17 2022" .
+          cmake --build . --config Release --target install
+
+      - name: Download libtiff from source
+        run: |
+          curl -L -o C:/tools/tiff.zip https://download.osgeo.org/libtiff/tiff-4.7.0.zip
+          tar -xf C:/tools/tiff.zip -C C:/tools
+
+      - name: Build libtiff
+        shell: cmd
+        run: |
+          cd /d C:/tools/tiff-4.7.0
+          cmake -G "Visual Studio 17 2022" .
+          cmake --build . --config Release --target install
+
+      - name: Download DCMTK
+        shell: cmd
+        run: |
+          curl -L -o C:/tools/dcmtk.zip https://github.com/DCMTK/dcmtk/releases/download/DCMTK-3.6.9/dcmtk-20241211-ac00290-win64.zip
+          tar -xf C:/tools/dcmtk.zip -C C:/tools
+          mkdir C:\dcmtk_support\libs\zlib-1.3\lib
+          copy C:\tools\zlib-1.3.1\build\Release\zlib.lib C:\dcmtk_support\libs\zlib-1.3\lib\zlib_o.lib
+
+      - name: Build oct_cpp_framework
+        run: |
+          cd C:/repos/oct_cpp_framework
+          mkdir build && cd build
+          cmake -G "Visual Studio 17 2022" ..
+          cmake --build . --config Release
+
+      - name: Build LibE2E
+        run: |
+          cd C:/repos/LibE2E
+          mkdir build && cd build
+          cmake -G "Visual Studio 17 2022" ..
+          cmake --build . --config Release
+
+      - name: Build LibOctData
+        run: |
+          cd C:/repos/LibOctData
+          mkdir build && cd build
+          cmake -G "Visual Studio 17 2022" `
+            -DBUILD_WITH_SUPPORT_DICOM=ON `
+            -DCMAKE_CXX_FLAGS="/Zc:__cplusplus /DNOMINMAX /EHsc" `
+            -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON ..
+          cmake --build . --config Release --target install
+
+      - name: Build octdata4python wheels
+        env:
+            TIFF_RELEASE: C:/tools/tiff-4.7.0/libtiff/Release
+            ZLIB_RELEASE: C:/tools/zlib-1.3.1/build/Release
+        run: |
+          cd C:/repos/octdata4python
+          powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+          $env:Path = "C:\Users\runneradmin\.local\bin;$env:Path"
+          
+          $pyVersions = @("3.10", "3.11", "3.12")
+          foreach ($ver in $pyVersions) {
+            echo "🌀 Syncing with Python $ver..."
+            uv sync --python=$ver
+
+            echo "📦 Building wheel for Python $ver..."
+            $env:CMAKE_ARGS = "-DPython3_VERSION=$ver"
+            .venv/Scripts/python -m build --installer=uv
+
+            echo "🛠️ Repairing wheels for Python $ver..."
+            $cp = $ver -replace '\.', ''
+            .venv/Scripts/delvewheel repair dist/octdata4python-*-cp$cp-cp$cp-*.whl `
+              --add-path=C:/repos/LibOctData/build/Release `
+              --add-path=C:/Boost/lib `
+              --add-path=$env:OpenCV_DIR/x64/vc16/bin `
+              --add-path=$env:OpenJPEG_DIR/bin `
+              --add-path=$env:TIFF_RELEASE `
+              --add-path=$env:ZLIB_RELEASE `
+              --add-path=$env:DCMTK_DIR/bin
+          }
+
+      - name: Fetch latest commit hash
+        id: get_commit_hash
+        run: echo "hash=$(git rev-parse --short HEAD)" >> $ENV:GITHUB_OUTPUT
+
+      - name: Upload Windows wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-wheels
+          path: C:/repos/octdata4python/wheelhouse/*.whl

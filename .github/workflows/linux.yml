@@ -34,15 +34,8 @@ jobs:
         id: get_commit_hash
         run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Linux wheels
+        uses: actions/upload-artifact@v4
         with:
-          files: |
-            wheelhouse/octdata4python-0.1.0-cp310-cp310-manylinux_2_39_x86_64.whl
-            wheelhouse/octdata4python-0.1.0-cp311-cp311-manylinux_2_39_x86_64.whl
-            wheelhouse/octdata4python-0.1.0-cp312-cp312-manylinux_2_39_x86_64.whl
-          body: Release created automatically from workflow.
-          draft: true
-          tag_name: ${{ steps.get_commit_hash.outputs.hash }}
+          name: linux-wheels
+          path: wheelhouse/*.whl

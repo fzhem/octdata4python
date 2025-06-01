@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    uses: ./.github/workflows/linux.yml
+
+  windows:
+    uses: ./.github/workflows/windows.yml
+
+  release:
+    needs: [linux, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Linux wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-wheels
+          path: wheelhouse
+
+      - name: Download Windows wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-wheels
+          path: wheelhouse
+
+      - name: Get latest commit hash
+        id: get_commit_hash
+        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: wheelhouse/*.whl
+          draft: true
+          body: Built and released from orchestrator workflow.
+          tag_name: ${{ steps.get_commit_hash.outputs.hash }}

@@ -1,7 +1,8 @@
-name: Linux
+name: Linux Wheels
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   compose-job:

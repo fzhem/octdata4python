@@ -26,6 +26,7 @@ jobs:
 
       - name: Install dependencies (numpy needed for boost)
         run: |
+          # numpy must be installed first — boost's b2.exe build tool depends on it
           $versions = @("Python310", "Python311", "Python312")
           foreach ($v in $versions) {
             $root = (Get-Item "env:${v}_ROOT_DIR").Value
@@ -140,6 +141,8 @@ jobs:
 
       - name: Build OpenJPEG
         run: |
+          # Building OpenJPEG from source to dodge msvcp.dll version conflicts in the wheel package
+          # (Prebuilt binaries cause runtime headaches with mismatched MSVC runtime DLLs)
           cd C:/repos/openjpeg
           cmake -G "Visual Studio 17 2022" .
           cmake --build . --config Release --target install

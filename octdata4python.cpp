@@ -16,8 +16,8 @@
  *
  */
 
-#define BOOST_NUMPY_INTERNAL
-#define PY_ARRAY_UNIQUE_SYMBOL OCTDATA_ARRAY_API
+/* #define BOOST_NUMPY_INTERNAL
+#define PY_ARRAY_UNIQUE_SYMBOL OCTDATA_ARRAY_API */
 
 #include <string>
 #include <vector>

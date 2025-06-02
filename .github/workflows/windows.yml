@@ -200,7 +200,7 @@ jobs:
           powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
           $env:Path = "C:\Users\runneradmin\.local\bin;$env:Path"
           
-          $pyVersions = @("3.10", "3.11", "3.12")
+          $pyVersions = @("3.10", "3.11", "3.12", "3.13")
           foreach ($ver in $pyVersions) {
             echo "🌀 Syncing with Python $ver..."
             uv sync --python=$ver

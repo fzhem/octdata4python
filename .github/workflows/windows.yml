@@ -31,7 +31,7 @@ jobs:
           foreach ($v in $versions) {
             $root = (Get-Item "env:${v}_ROOT_DIR").Value
             & "$root\python.exe" -m pip install --upgrade pip setuptools wheel
-            & "$root\Scripts\pip.exe" install numpy==1.26.0
+            & "$root\Scripts\pip.exe" install numpy
           }
 
       - name: Clone required forks

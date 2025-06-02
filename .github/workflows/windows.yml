@@ -40,7 +40,7 @@ jobs:
           git clone https://github.com/kaygdev/oct_cpp_framework.git
           git clone https://github.com/kaygdev/LibE2E.git
           git clone https://github.com/fzhem/LibOctData.git
-          git clone https://github.com/fzhem/octdata4python.git
+          git clone -b dev https://github.com/fzhem/octdata4python.git
 
       - name: Add missing boost find_package
         run: |

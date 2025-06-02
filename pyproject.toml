@@ -3,7 +3,7 @@ name = "octdata4python"
 requires-python = ">=3.9"
 version = "0.1.0"
 dependencies = [
-    "numpy<=1.26.0"
+    "numpy"
 ]
 
 [dependency-groups]

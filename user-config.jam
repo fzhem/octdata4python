@@ -1,7 +1,9 @@
 local PY310ROOT = [ modules.peek : Python310_ROOT_DIR ] ;
 local PY311ROOT = [ modules.peek : Python311_ROOT_DIR ] ;
 local PY312ROOT = [ modules.peek : Python312_ROOT_DIR ] ;
+local PY313ROOT = [ modules.peek : Python313_ROOT_DIR ] ;
 
 using python : 3.10 : $(PY310ROOT) : $(PY310ROOT)/include : $(PY310ROOT)/libs ;
 using python : 3.11 : $(PY311ROOT) : $(PY311ROOT)/include : $(PY311ROOT)/libs ;
 using python : 3.12 : $(PY312ROOT) : $(PY312ROOT)/include : $(PY312ROOT)/libs ;
+using python : 3.13 : $(PY313ROOT) : $(PY313ROOT)/include : $(PY313ROOT)/libs ;

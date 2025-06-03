@@ -15,10 +15,10 @@ jobs:
       DCMTK_DIR: C:/tools/dcmtk-20241211-ac00290
       OpenCV_DIR: C:/tools/opencv/build
       OpenJPEG_DIR: C:/Program Files (x86)/OPENJPEG
-      Python310_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.10.11\x64
-      Python311_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.11.9\x64
-      Python312_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
-      Python313_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.3\x64
+      Python310_ROOT_DIR: C:/hostedtoolcache/windows/Python/3.10.11/x64
+      Python311_ROOT_DIR: C:/hostedtoolcache/windows/Python/3.11.9/x64
+      Python312_ROOT_DIR: C:/hostedtoolcache/windows/Python/3.12.10/x64
+      Python313_ROOT_DIR: C:/hostedtoolcache/windows/Python/3.13.3/x64
 
     steps:
       - name: Checkout main repo
@@ -27,11 +27,11 @@ jobs:
       - name: Install dependencies (numpy needed for boost)
         run: |
           # numpy must be installed first — boost's b2.exe build tool depends on it
-          $versions = @("Python310", "Python311", "Python312")
+          $versions = @("Python310", "Python311", "Python312", "Python313")
           foreach ($v in $versions) {
             $root = (Get-Item "env:${v}_ROOT_DIR").Value
             & "$root\python.exe" -m pip install --upgrade pip setuptools wheel
-            & "$root\Scripts\pip.exe" install numpy==1.26.0
+            & "$root\Scripts\pip.exe" install numpy
           }
 
       - name: Clone required forks
@@ -115,14 +115,14 @@ jobs:
 
       - name: Build and Install Boost Libraries
         env:
-           BOOST_BUILD_PATH: ${{ github.workspace }}
+          BOOST_BUILD_PATH: ${{ github.workspace }}
         if: steps.restore-boost-build-cache.outputs.cache-hit != 'true'
         shell: cmd
         run: |
           cd /d C:/local/boost_1_88_0
           b2 -j%NUMBER_OF_PROCESSORS% ^
               toolset=msvc-14.3 address-model=64 variant=release link=shared threading=multi runtime-link=shared ^
-              python=3.10,3.11,3.12 ^
+              python=3.10,3.11,3.12,3.13 ^
             --with-iostreams --with-locale --with-log --with-python --with-program_options --with-serialization ^
             --debug-configuration ^
             --prefix=C:/Boost install
@@ -193,14 +193,14 @@ jobs:
 
       - name: Build octdata4python wheels
         env:
-            TIFF_RELEASE: C:/tools/tiff-4.7.0/libtiff/Release
-            ZLIB_RELEASE: C:/tools/zlib-1.3.1/build/Release
+          TIFF_RELEASE: C:/tools/tiff-4.7.0/libtiff/Release
+          ZLIB_RELEASE: C:/tools/zlib-1.3.1/build/Release
         run: |
           cd C:/repos/octdata4python
           powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
           $env:Path = "C:\Users\runneradmin\.local\bin;$env:Path"
-          
-          $pyVersions = @("3.10", "3.11", "3.12")
+
+          $pyVersions = @("3.10", "3.11", "3.12", "3.13")
           foreach ($ver in $pyVersions) {
             echo "🌀 Syncing with Python $ver..."
             uv sync --python=$ver

@@ -9,7 +9,7 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 # Match Boost libs per platform and Python version
-if(WIN32)
+if(Python3_VERSION)
   string(REPLACE "." "" PY_VER "${Python3_VERSION}")
   set(BOOST_PYTHON_COMPONENT "python${PY_VER}")
 else()

@@ -1,17 +1,18 @@
 import os ;
 
-if [ os.name ] = NT {
-    LIB_SUFFIX = libs ;
-} else {
-    LIB_SUFFIX = lib ;
-}
-
 local PY310ROOT = [ modules.peek : Python310_ROOT_DIR ] ;
 local PY311ROOT = [ modules.peek : Python311_ROOT_DIR ] ;
 local PY312ROOT = [ modules.peek : Python312_ROOT_DIR ] ;
 local PY313ROOT = [ modules.peek : Python313_ROOT_DIR ] ;
 
-using python : 3.10 : $(PY310ROOT) : $(PY310ROOT)/include : $(PY310ROOT)/$(LIB_SUFFIX) ;
-using python : 3.11 : $(PY311ROOT) : $(PY311ROOT)/include : $(PY311ROOT)/$(LIB_SUFFIX) ;
-using python : 3.12 : $(PY312ROOT) : $(PY312ROOT)/include : $(PY312ROOT)/$(LIB_SUFFIX) ;
-using python : 3.13 : $(PY313ROOT) : $(PY313ROOT)/include : $(PY313ROOT)/$(LIB_SUFFIX) ;
+if [ os.name ] = NT {
+    using python : 3.10 : $(PY310ROOT) : $(PY310ROOT)/include : $(PY310ROOT)/libs ;
+    using python : 3.11 : $(PY311ROOT) : $(PY311ROOT)/include : $(PY311ROOT)/libs ;
+    using python : 3.12 : $(PY312ROOT) : $(PY312ROOT)/include : $(PY312ROOT)/libs ;
+    using python : 3.13 : $(PY313ROOT) : $(PY313ROOT)/include : $(PY313ROOT)/libs ;
+} else {
+    using python : 3.10 : $(PY310ROOT)/bin/python : $(PY310ROOT)/include/python3.10 : $(PY310ROOT)/lib ;
+    using python : 3.11 : $(PY311ROOT)/bin/python : $(PY311ROOT)/include/python3.11 : $(PY311ROOT)/lib ;
+    using python : 3.12 : $(PY312ROOT)/bin/python : $(PY312ROOT)/include/python3.12 : $(PY312ROOT)/lib ;
+    using python : 3.13 : $(PY313ROOT)/bin/python : $(PY313ROOT)/include/python3.13 : $(PY313ROOT)/lib ;
+}

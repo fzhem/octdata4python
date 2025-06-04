@@ -1,0 +1,38 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    -   id: check-illegal-windows-names
+    -   id: trailing-whitespace
+    -   id: mixed-line-ending
+        args: [--fix=lf]
+    -   id: end-of-file-fixer
+        exclude: |
+            (?x)(
+                ^.gitignore|
+                ^.pre-commit-config.yaml|
+                ^pyproject.toml|
+            )
+    -   id: check-ast
+    -   id: check-docstring-first
+    -   id: check-symlinks
+    -   id: check-toml
+    -   id: check-added-large-files
+        args: ['--maxkb=50']
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.12
+    hooks:  # https://github.com/astral-sh/ruff-pre-commit/issues/64#issuecomment-2075571181
+      - id: ruff
+        name: lint with ruff
+      - id: ruff
+        name: sort imports with ruff
+        args: [--select, I, --fix]
+      - id: ruff-format
+        name: format with ruff
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.16.0'
+    hooks:
+    -   id: mypy
+        language: system  # https://jaredkhan.com/blog/mypy-pre-commit
+        types: [python]
+        args: [--config-file=mypy.ini]

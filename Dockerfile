@@ -40,7 +40,7 @@ RUN echo "For user-config.jam"
 ENV Python310_ROOT_DIR=/root/.local/share/uv/python/cpython-3.10.17-linux-x86_64-gnu
 ENV Python311_ROOT_DIR=/root/.local/share/uv/python/cpython-3.11.12-linux-x86_64-gnu
 ENV Python312_ROOT_DIR=/root/.local/share/uv/python/cpython-3.12.10-linux-x86_64-gnu
-ENV Python313_ROOT_DIR=/root/.local/share/uv/python/cpython-3.13.3-linux-x86_64-gnu
+ENV Python313_ROOT_DIR=/root/.local/share/uv/python/cpython-3.13.4-linux-x86_64-gnu
 
 WORKDIR /home/appuser/oct
 

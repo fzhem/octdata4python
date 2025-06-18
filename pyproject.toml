@@ -1,10 +1,26 @@
 [project]
 name = "octdata4python"
-requires-python = ">=3.10"
 version = "0.1.1"
-dependencies = [
-    "numpy>1.26.0"
+description = "Python bindings for reading and parsing E2E/SDB OCT files using a high-performance C++ backend"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "AGPL-3.0-only" }
+authors = [ { name = "Faizan Hemotra" } ]
+keywords = [ "OCT", "optical coherence tomography", "Heidelberg", "sdb", "e2e", "medical imaging", "C++", "Python" ]
+dependencies = [ "numpy>1.26.0" ]
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: GNU Affero General Public License v3",
+  "Programming Language :: C++",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering"
 ]
+
+[project.urls]
+Homepage = "https://github.com/fzhem/octdata4python"
+Documentation = "https://github.com/fzhem/octdata4python/blob/main/README.md"
+Repository = "https://github.com/fzhem/octdata4python"
+Issues = "https://github.com/fzhem/octdata4python/issues"
 
 [dependency-groups]
 dev = [

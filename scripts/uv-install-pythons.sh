@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-versions=("3.10.17" "3.11.12" "3.12.10" "3.13.4")
+versions=("3.10.17" "3.11.12" "3.12.10" "3.13.5")
 
 for v in "${versions[@]}"; do
   echo "📦 Installing Python $v via uv..."

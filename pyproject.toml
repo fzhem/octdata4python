@@ -1,6 +1,6 @@
 [project]
 name = "octdata4python"
-version = "0.1.1"
+version = "0.1.2"
 description = "Python bindings for reading and parsing E2E/SDB OCT files using a high-performance C++ backend"
 readme = "README.md"
 requires-python = ">=3.10"
